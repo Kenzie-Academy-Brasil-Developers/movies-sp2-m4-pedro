@@ -1,0 +1,25 @@
+{
+  "name": "market-sp1-m4-pedro",
+  "version": "1.0.0",
+  "description": "Recebemos uma demanda para realizar a criação de uma API REST. Essa API será utilizada para organização do estoque de uma startup em processo de testes que pretende se transformar em uma rede de mercados autônomos (Smart Store). Hoje o mercado trabalha com apenas dois tipos de produtos: **comida** e **limpeza**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --ignore-watch=node_modules --rs --cls src/app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/pg-format": "^1.0.2",
+    "express": "^4.18.2",
+    "pg": "^8.10.0",
+    "pg-format": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/pg": "^8.6.6",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.2"
+  }
+}
