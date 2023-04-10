@@ -1,13 +1,11 @@
-import { QueryResult } from "pg";
-
-export interface IMovies {
+type TMovies = {
   id: number;
   name: string;
   category: string;
-  duration: number;
-  price: number;
-}
+  duration: string;
+  price: string;
+};
 
-export type IMoviesRequest = Omit<IMovies, "id">;
+type TMoviesRequest = Omit<TMovies, "id">;
 
-export type IMovieResult = QueryResult<IMovies>;
+export { TMovies, TMoviesRequest };

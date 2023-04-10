@@ -1,109 +1,103 @@
 import { Request, Response } from "express";
-import { IMovieResult } from "./interfaces";
-import { client } from "./database";
+import { TMovies, TMoviesRequest } from "./interfaces";
 import format from "pg-format";
+import { QueryResult } from "pg";
+import { client } from "./database";
 
-const ok = 200;
-const created = 201;
-const noContent = 204;
+const createMovies = async (req: Request, res: Response): Promise<Response> => {
+  const payload: TMoviesRequest = req.body;
 
-export const createMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const movieBody = req.body;
-
-  console.log(movieBody);
-  const queryString = format(
+  const queryString: string = format(
     `
     INSERT INTO movies (%I)
-    VALUES (%L)
+    VALUES (%L)  
     RETURNING *;
     `,
-    Object.keys(movieBody),
-    Object.values(movieBody)
+    Object.keys(payload),
+    Object.values(payload)
   );
 
-  const queryResult: IMovieResult = await client.query(queryString);
-  const createdMovie = queryResult.rows[0];
+  const queryResult: QueryResult<TMovies> = await client.query(queryString);
 
-  return res.status(created).json(createdMovie);
+  return res.status(201).json(queryResult.rows[0]);
 };
 
-export const listAllMovies = async (
+const listAllMovies = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const queryString = `
+  const queryString: string = format(
+    `
     SELECT * FROM movies;
-`;
+    `
+  );
 
-  const queryResult: IMovieResult = await client.query(queryString);
-  const movies = queryResult.rows;
+  const queryResult: QueryResult<TMovies> = await client.query(queryString);
 
-  return res.status(ok).json(movies);
+  return res.status(200).json(queryResult.rows);
 };
 
-export const listEspecificMovie = async (
+const listSpecificMovies = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const id = req.params.id;
+  const id: number = Number(req.params.id);
 
-  const queryString = format(
+  const queryString: string = format(
     `
     SELECT * FROM movies
-    WHERE id = %L;
+    WHERE id = %L
     `,
     id
   );
 
-  const queryResult: IMovieResult = await client.query(queryString);
-  const movie = queryResult.rows[0];
+  const queryResult: QueryResult<TMovies> = await client.query(queryString);
 
-  return res.status(ok).json(movie);
+  return res.status(200).json(queryResult.rows[0]);
 };
 
-export const updateMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const id = req.params.id;
-  const movieData = req.body;
+const updateMovies = async (req: Request, res: Response): Promise<Response> => {
+  const payload: TMoviesRequest = req.body;
+  const id: number = Number(req.params.id);
 
-  const queryString = format(
+  const queryString: string = format(
     `
     UPDATE movies
     SET(%I) = ROW(%L)
     WHERE id = %L
     RETURNING *;
     `,
-    Object.keys(movieData),
-    Object.values(movieData),
+    Object.keys(payload),
+    Object.values(payload),
     id
   );
 
-  const queryResult: IMovieResult = await client.query(queryString);
-  const updatedMovie = queryResult.rows[0];
+  const queryResult: QueryResult<TMovies> = await client.query(queryString);
+  console.log(queryResult);
 
-  return res.status(ok).send(updatedMovie);
+  return res.status(200).json(queryResult.rows[0]);
 };
 
-export const deleteMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const id = req.body.id;
+const deleteMovies = async (req: Request, res: Response): Promise<Response> => {
+  const id: number = Number(req.params.id);
 
-  const queryString = format(
+  const queryString: string = format(
     `
-    DELETE FROM movies 
-    WHERE id = %L;
-    `,
+  DELETE FROM movies
+  WHERE id = %L
+  `,
     id
   );
 
   await client.query(queryString);
 
-  return res.status(noContent).send();
+  return res.status(204).send();
+};
+
+export {
+  createMovies,
+  listAllMovies,
+  listSpecificMovies,
+  updateMovies,
+  deleteMovies,
 };
