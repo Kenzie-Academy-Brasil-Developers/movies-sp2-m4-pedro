@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { TMovies, TMoviesRequest } from "./interfaces";
 import format from "pg-format";
-import { QueryResult } from "pg";
+import { QueryConfig, QueryResult } from "pg";
 import { client } from "./database";
 
 const createMovies = async (req: Request, res: Response): Promise<Response> => {
@@ -22,17 +22,34 @@ const createMovies = async (req: Request, res: Response): Promise<Response> => {
   return res.status(201).json(queryResult.rows[0]);
 };
 
-const listAllMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const queryString: string = format(
-    `
-    SELECT * FROM movies;
-    `
-  );
+const listMovies = async (req: Request, res: Response): Promise<Response> => {
+  const category: any = req.query.category;
+  let queryString: string = "";
+  let queryResult: QueryResult;
 
-  const queryResult: QueryResult<TMovies> = await client.query(queryString);
+  if (category) {
+    queryString = `
+      SELECT * FROM movies
+      WHERE category = $1;
+      `;
+    const queryConfig: QueryConfig = {
+      text: queryString,
+      values: [category],
+    };
+    queryResult = await client.query(queryConfig);
+
+    if (queryResult.rowCount === 0) {
+      queryString = `
+    SELECT * FROM movies;
+    `;
+      queryResult = await client.query(queryString);
+    }
+  } else {
+    queryString = `
+    SELECT * FROM movies;
+    `;
+    queryResult = await client.query(queryString);
+  }
 
   return res.status(200).json(queryResult.rows);
 };
@@ -96,7 +113,7 @@ const deleteMovies = async (req: Request, res: Response): Promise<Response> => {
 
 export {
   createMovies,
-  listAllMovies,
+  listMovies,
   listSpecificMovies,
   updateMovies,
   deleteMovies,

@@ -34,8 +34,26 @@ const checkIfNameAlreadyExists = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<Response> => {
-  return res.status(409).json();
+): Promise<Response | void> => {
+  const { name } = req.body;
+
+  const queryString: string = format(
+    `
+    SELECT * FROM movies
+    WHERE name = %L
+    `,
+    name
+  );
+
+  const queryResult: QueryResult<TMovies> = await client.query(queryString);
+
+  if (queryResult.rowCount > 0) {
+    return res.status(409).json({
+      error: "Movie name already exists!",
+    });
+  }
+
+  return next();
 };
 
-export { ensureMovieExists };
+export { ensureMovieExists, checkIfNameAlreadyExists };

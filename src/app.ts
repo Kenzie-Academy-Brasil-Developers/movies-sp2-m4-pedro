@@ -3,19 +3,24 @@ import { startDatabase } from "./database";
 import {
   createMovies,
   deleteMovies,
-  listAllMovies,
+  listMovies,
   listSpecificMovies,
   updateMovies,
 } from "./logic";
-import { ensureMovieExists } from "./middlewares";
+import { checkIfNameAlreadyExists, ensureMovieExists } from "./middlewares";
 
 const app: Application = express();
 app.use(express.json());
 
-app.post("/movies", createMovies);
-app.get("/movies", listAllMovies);
+app.post("/movies", checkIfNameAlreadyExists, createMovies);
+app.get("/movies", listMovies);
 app.get("/movies/:id", ensureMovieExists, listSpecificMovies);
-app.patch("/movies/:id", ensureMovieExists, updateMovies);
+app.patch(
+  "/movies/:id",
+  ensureMovieExists,
+  checkIfNameAlreadyExists,
+  updateMovies
+);
 app.delete("/movies/:id", ensureMovieExists, deleteMovies);
 
 const HOST: string = "localhost";
